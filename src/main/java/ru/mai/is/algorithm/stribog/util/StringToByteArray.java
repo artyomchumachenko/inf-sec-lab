@@ -9,6 +9,11 @@ public class StringToByteArray {
      * @return массив байтов
      */
     public static byte[] castStringToBytes(String hex) {
+        // Если длина строки нечетная, добавляем ведущий ноль
+        if (hex.length() % 2 != 0) {
+            hex = "0" + hex;
+        }
+
         int len = hex.length();
         byte[] data = new byte[len / 2];
         for (int i = 0; i < len; i += 2) {

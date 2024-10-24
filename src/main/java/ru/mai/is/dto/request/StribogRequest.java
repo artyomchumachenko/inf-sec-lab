@@ -2,11 +2,13 @@ package ru.mai.is.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Data
+@Builder
 public class StribogRequest {
     private String text;
     private StribogMode mode;

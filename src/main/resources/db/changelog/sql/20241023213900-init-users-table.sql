@@ -2,9 +2,12 @@
 
 --changeset achumachenko:20241023213900
 
+-- Create enum type for roles
+create type role_enum as enum ('DEFAULT_USER', 'ADMIN');
+
 -- Creating the users table
 create table users (
-    id serial primary key,
+    id uuid primary key,
     username varchar(50) not null unique,
     password varchar(255) not null,
     email varchar(100) unique,
@@ -15,14 +18,14 @@ create table users (
 
 -- Creating the roles table
 create table roles (
-    id serial primary key,
-    name varchar(50) not null unique
+    id uuid primary key,
+    role role_enum not null unique
 );
 
 -- Creating the user_roles table for the many-to-many relationship
 create table user_roles (
-    user_id int not null,
-    role_id int not null,
+    user_id uuid not null,
+    role_id uuid not null,
     primary key (user_id, role_id),
     constraint fk_user
         foreign key (user_id) references users(id)
