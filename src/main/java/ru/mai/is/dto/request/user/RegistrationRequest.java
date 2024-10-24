@@ -1,4 +1,4 @@
-package ru.mai.is.dto.request;
+package ru.mai.is.dto.request.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

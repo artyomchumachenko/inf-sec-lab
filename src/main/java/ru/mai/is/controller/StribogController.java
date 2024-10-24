@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import ru.mai.is.dto.request.StribogRequest;
+import ru.mai.is.dto.request.algorithm.StribogRequest;
 import ru.mai.is.dto.response.TextResponse;
-import ru.mai.is.service.StribogService;
+import ru.mai.is.service.algorithm.StribogService;
 
 import lombok.RequiredArgsConstructor;
 

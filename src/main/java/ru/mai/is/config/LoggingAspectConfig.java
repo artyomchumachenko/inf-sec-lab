@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import ru.mai.is.dto.request.RegistrationRequest;
+import ru.mai.is.dto.request.user.RegistrationRequest;
 
 import lombok.extern.slf4j.Slf4j;
 

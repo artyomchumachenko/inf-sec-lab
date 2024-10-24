@@ -1,72 +1,23 @@
-package ru.mai.is.service;
+package ru.mai.is.service.user;
 
-import java.security.SecureRandom;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import javax.persistence.EntityNotFoundException;
-
-import org.bouncycastle.util.encoders.Hex;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import ru.mai.is.dto.request.RegistrationRequest;
-import ru.mai.is.dto.request.StribogRequest;
-import ru.mai.is.model.Role;
-import ru.mai.is.model.User;
-import ru.mai.is.repository.RoleRepository;
-import ru.mai.is.repository.UserRepository;
+import ru.mai.is.dto.request.algorithm.StribogRequest;
+import ru.mai.is.dto.request.user.LoginRequest;
+import ru.mai.is.service.algorithm.StribogService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
-public class UserService {
+@RequiredArgsConstructor
+public class PasswordEncoderService {
 
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
     private final StribogService stribogService;
 
-    @Transactional(readOnly = true)
-    public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }
-
-    @Transactional
-    public User saveUser(User user) {
-        return userRepository.save(user);
-    }
-
-    @Transactional(readOnly = true)
-    public List<User> findAllUsers() {
-        return userRepository.findAll();
-    }
-
-    @Transactional
-    public void deleteUser(Long userId) {
-        userRepository.deleteById(userId);
-    }
-
-    /**
-     * Метод регистрации нового пользователя в системе
-     * @param request Запрос на регистрацию пользователя
-     */
-    @Transactional
-    public User registrationUser(RegistrationRequest request) {
-        log.info("Start registration user: {}", request.getUsername());
-        Role defaultRole = roleRepository.findByRole(Role.RoleEnum.DEFAULT_USER)
-                .orElseThrow(() -> new EntityNotFoundException("Default role not found"));
-        User user = new User(
-                request.getUsername(),
-                hashAndSaltPassword(request.getUsername(), request.getPassword()),
-                request.getEmail(),
-                request.getPhone(),
-                Set.of(defaultRole)
-        );
-        return saveUser(user);
+    public String encode(String username, String password) {
+        return hashAndSaltPassword(username, password);
     }
 
     private String hashAndSaltPassword(String username, String password) {
@@ -91,17 +42,15 @@ public class UserService {
     }
 
     private String generateCoolSalt(String username, String passwordHash) {
-        // Generate random bytes
-        SecureRandom random = new SecureRandom();
-        byte[] randomBytes = new byte[16]; // 128 bits
-        random.nextBytes(randomBytes);
-        String randomPart = Hex.toHexString(randomBytes);
-
         // Use user-specific data
-        String userData = username + passwordHash;
+        StribogRequest usernameHashRequest = StribogRequest.builder()
+                .text(username)
+                .mode(StribogRequest.StribogMode.MODE_512)
+                .build();
+        String userDataHash = stribogService.getHash(usernameHashRequest) + passwordHash;
 
         // Combine and hash them to create the final salt
-        String combined = randomPart + userData;
+        String combined = passwordHash + userDataHash;
 
         StribogRequest saltHashRequest = StribogRequest.builder()
                 .text(combined)
@@ -132,5 +81,10 @@ public class UserService {
                 .build();
 
         return stribogService.getHash(finalHashRequest);
+    }
+
+    public boolean matches(LoginRequest loginRequest, String expectedPassword) {
+        String actualEncodedPassword = encode(loginRequest.getUsername(), loginRequest.getPassword());
+        return actualEncodedPassword.equals(expectedPassword);
     }
 }

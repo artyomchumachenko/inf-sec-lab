@@ -1,9 +1,9 @@
-package ru.mai.is.service;
+package ru.mai.is.service.algorithm;
 
 import org.springframework.stereotype.Service;
 
 import ru.mai.is.algorithm.stribog.StribogImpl;
-import ru.mai.is.dto.request.StribogRequest;
+import ru.mai.is.dto.request.algorithm.StribogRequest;
 
 import lombok.RequiredArgsConstructor;
 

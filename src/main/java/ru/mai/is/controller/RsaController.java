@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import ru.mai.is.dto.request.RsaRequest;
+import ru.mai.is.dto.request.algorithm.RsaRequest;
 import ru.mai.is.dto.response.TextResponse;
-import ru.mai.is.service.RsaService;
+import ru.mai.is.service.algorithm.RsaService;
 
 import lombok.RequiredArgsConstructor;
 

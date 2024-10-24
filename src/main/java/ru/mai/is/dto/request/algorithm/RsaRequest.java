@@ -1,4 +1,4 @@
-package ru.mai.is.dto.request;
+package ru.mai.is.dto.request.algorithm;
 
 import lombok.Data;
 

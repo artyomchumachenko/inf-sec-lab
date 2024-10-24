@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import ru.mai.is.dto.response.ErrorResponse;
+import ru.mai.is.dto.response.TextResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,18 +19,18 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public final ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+    public final ResponseEntity<TextResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
         log.error("DataIntegrityViolationException: ", ex);
 
         if (ex.getCause() instanceof org.hibernate.exception.ConstraintViolationException) {
             return new ResponseEntity<>(
-                    new ErrorResponse("Ошибка: нарушено уникальное ограничение. Данное значение уже существует в базе данных. " + ex.getLocalizedMessage()),
+                    new TextResponse("Ошибка: нарушено уникальное ограничение. Данное значение уже существует в базе данных. " + ex.getLocalizedMessage()),
                     HttpStatus.CONFLICT
             );
         }
 
         return new ResponseEntity<>(
-                new ErrorResponse("Ошибка целостности данных: " + ex.getLocalizedMessage()),
+                new TextResponse("Ошибка целостности данных: " + ex.getLocalizedMessage()),
                 HttpStatus.CONFLICT
         );
     }

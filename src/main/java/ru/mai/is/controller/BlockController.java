@@ -7,10 +7,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import ru.mai.is.dto.request.BlockRequest;
-import ru.mai.is.dto.response.ErrorResponse;
+import ru.mai.is.dto.request.algorithm.BlockRequest;
 import ru.mai.is.dto.response.TextResponse;
-import ru.mai.is.service.BlockService;
+import ru.mai.is.service.algorithm.BlockService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,7 +28,7 @@ public class BlockController {
             return ResponseEntity.ok(response);
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body(new ErrorResponse("Block cipher encrypt error."));
+                    .body(new TextResponse("Block cipher encrypt error."));
         }
     }
 
@@ -41,7 +40,7 @@ public class BlockController {
             return ResponseEntity.ok(response);
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body(new ErrorResponse("Block cipher decrypt error."));
+                    .body(new TextResponse("Block cipher decrypt error."));
         }
     }
 }

@@ -1,4 +1,4 @@
-package ru.mai.is.service;
+package ru.mai.is.service.algorithm;
 
 import java.io.File;
 import java.io.IOException;

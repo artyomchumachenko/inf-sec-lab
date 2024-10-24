@@ -1,4 +1,4 @@
-package ru.mai.is.service;
+package ru.mai.is.service.algorithm;
 
 import java.security.Security;
 
@@ -8,7 +8,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.stereotype.Service;
 
-import ru.mai.is.dto.request.BlockRequest;
+import ru.mai.is.dto.request.algorithm.BlockRequest;
 
 import lombok.extern.slf4j.Slf4j;
 
