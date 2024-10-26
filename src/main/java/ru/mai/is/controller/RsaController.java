@@ -39,7 +39,7 @@ public class RsaController {
         }
 
         String encryptedText = rsaService.decrypt(request.getText());
-        TextResponse response = new TextResponse(encryptedText);
+        TextResponse response = new TextResponse(encryptedText.substring(1));
         return ResponseEntity.ok(response);
     }
 
