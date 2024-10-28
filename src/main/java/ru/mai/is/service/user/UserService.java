@@ -80,4 +80,10 @@ public class UserService {
             throw new IllegalArgumentException("Неверный пароль");
         }
     }
+
+    @Transactional
+    public User findByAuthorizationHeader(String authorizationHeader) {
+        String username = jwtTokenProvider.getUsernameFromAuthorizationHeader(authorizationHeader);
+        return findByUsername(username).orElseThrow(() -> new EntityNotFoundException("User not found"));
+    }
 }

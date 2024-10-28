@@ -8,6 +8,7 @@ import lombok.Data;
 public class BlockRequest {
     private String text;
     private BlockMode mode;
+    private String key;
 
     public enum BlockMode {
         @JsonProperty("64")

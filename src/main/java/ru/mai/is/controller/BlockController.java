@@ -3,6 +3,7 @@ package ru.mai.is.controller;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -42,5 +43,15 @@ public class BlockController {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new TextResponse("Block cipher decrypt error."));
         }
+    }
+
+    @GetMapping("/gost-key")
+    public ResponseEntity<TextResponse> getGostKey() {
+        return ResponseEntity.ok(new TextResponse(BlockService.DEFAULT_BLOCK_CIPHER_KEY));
+    }
+
+    @GetMapping("/last-key")
+    public ResponseEntity<TextResponse> getLastKey(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return ResponseEntity.ok(blockService.lastKey(authorizationHeader));
     }
 }
