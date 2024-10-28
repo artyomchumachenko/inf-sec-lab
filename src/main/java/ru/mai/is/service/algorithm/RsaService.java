@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import javax.annotation.PostConstruct;
 
@@ -128,7 +129,10 @@ public class RsaService {
 
         byte[] encryptedBytes = new BigInteger(text, 16).toByteArray();
         byte[] decryptedBytes = RsaCipherImpl.decrypt(encryptedBytes, keyPair.getPrivateKey());
-        String decryptedText = new String(decryptedBytes, StandardCharsets.UTF_8).substring(1);
+        if (decryptedBytes[0] == 0) {
+            decryptedBytes = Arrays.copyOfRange(decryptedBytes, 1, decryptedBytes.length);
+        }
+        String decryptedText = new String(decryptedBytes, StandardCharsets.UTF_8);
 
         encryptionResultService.saveRsaEncryptionResult(new RSAKey(user, serializeRSAKey(keyPair.getPublicKey()),
                 serializeRSAKey(keyPair.getPrivateKey())), text, decryptedText);

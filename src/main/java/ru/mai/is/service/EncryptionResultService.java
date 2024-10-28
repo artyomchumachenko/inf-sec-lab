@@ -1,5 +1,8 @@
 package ru.mai.is.service;
 
+import java.io.FileInputStream;
+import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -14,6 +17,9 @@ import ru.mai.is.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import static ru.mai.is.service.PdfSignerService.generateSignature;
+import static ru.mai.is.service.PdfSignerService.signPdfWithGeneratedSignature;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -23,15 +29,35 @@ public class EncryptionResultService {
     private final EncryptionResultRepository encryptionResultRepository;
     private final UserService userService;
 
+    private final PdfSignerService pdfSigner;
+
     public void saveEncryptionResult(BlockCipherKey blockCipherKey, String inputText, String resultText) {
         log.info("Saving results for: {}, {}", inputText, resultText);
         byte[] inputTextPdf = pdfGeneratorService.generatePdfByText(inputText);
         byte[] resultTextPdf = pdfGeneratorService.generatePdfByText(resultText);
-        //todo signature for pdfs
+
+        String keystorePath = "src/main/resources/mykeystore.p12";
+        String keystorePassword = "keystorePassword";
+        String alias = "myalias";
+        byte[] signatureBytes;
+        byte[] signedResultPdf;
+        try {
+            KeyStore keystore = KeyStore.getInstance("PKCS12");
+            try (FileInputStream fis = new FileInputStream(keystorePath)) {
+                keystore.load(fis, keystorePassword.toCharArray());
+            }
+
+            PrivateKey privateKey = (PrivateKey) keystore.getKey(alias, keystorePassword.toCharArray());
+            signatureBytes = generateSignature(resultTextPdf, privateKey);
+            signedResultPdf = signPdfWithGeneratedSignature(resultTextPdf, signatureBytes);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         EncryptionResult encryptionResult = new EncryptionResult(
                 inputTextPdf,
-                resultTextPdf,
-                null, // todo Impl signature logic
+                signedResultPdf,
+                signatureBytes,
                 blockCipherKey.getUser(),
                 null,
                 blockCipherKey
@@ -43,11 +69,29 @@ public class EncryptionResultService {
         log.info("Saving results for: {}, {}", inputText, resultText);
         byte[] inputTextPdf = pdfGeneratorService.generatePdfByText(inputText);
         byte[] resultTextPdf = pdfGeneratorService.generatePdfByText(resultText);
-        //todo signature for pdfs
+
+        String keystorePath = "src/main/resources/mykeystore.p12";
+        String keystorePassword = "keystorePassword";
+        String alias = "myalias";
+        byte[] signatureBytes;
+        byte[] signedResultPdf;
+        try {
+            KeyStore keystore = KeyStore.getInstance("PKCS12");
+            try (FileInputStream fis = new FileInputStream(keystorePath)) {
+                keystore.load(fis, keystorePassword.toCharArray());
+            }
+
+            PrivateKey privateKey = (PrivateKey) keystore.getKey(alias, keystorePassword.toCharArray());
+            signatureBytes = generateSignature(resultTextPdf, privateKey);
+            signedResultPdf = signPdfWithGeneratedSignature(resultTextPdf, signatureBytes);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         EncryptionResult encryptionResult = new EncryptionResult(
                 inputTextPdf,
-                resultTextPdf,
-                null, // todo Impl signature logic
+                signedResultPdf,
+                signatureBytes,
                 rsaKey.getUser(),
                 rsaKey,
                 null
