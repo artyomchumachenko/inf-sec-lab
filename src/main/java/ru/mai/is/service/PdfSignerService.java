@@ -24,18 +24,22 @@ public class PdfSignerService {
         Security.addProvider(new BouncyCastleProvider());
     }
 
-    public static byte[] generateSignature(byte[] data, PrivateKey privateKey) throws Exception {
-        // Создаем объект для подписи с указанием алгоритма, например, SHA256withRSA
-        Signature signature = Signature.getInstance("SHA256withRSA");
+    public static byte[] generateSignature(byte[] data, PrivateKey privateKey) {
+        try {
+            // Создаем объект для подписи с указанием алгоритма, например, SHA256withRSA
+            Signature signature = Signature.getInstance("SHA256withRSA");
 
-        // Инициализируем подпись закрытым ключом
-        signature.initSign(privateKey);
+            // Инициализируем подпись закрытым ключом
+            signature.initSign(privateKey);
 
-        // Добавляем данные, которые нужно подписать
-        signature.update(data);
+            // Добавляем данные, которые нужно подписать
+            signature.update(data);
 
-        // Возвращаем подпись в виде массива байтов
-        return signature.sign();
+            // Возвращаем подпись в виде массива байтов
+            return signature.sign();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
     }
 
     // Метод для добавления подписи в PDF
@@ -51,7 +55,7 @@ public class PdfSignerService {
         appearance.setLocation("Encryption Tool");
 
         // Установка позиции и размера области подписи на последней странице
-        Rectangle signatureRectangle = new Rectangle(100, 100, 200, 150); // Координаты области подписи
+        Rectangle signatureRectangle = new Rectangle(100, 100, 400, 250); // Координаты области подписи
         appearance.setVisibleSignature(signatureRectangle, lastPage, "sig"); // Устанавливаем подпись на последней странице
 
         // Используем внешнюю подпись в формате PKCS#7

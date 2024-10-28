@@ -62,7 +62,7 @@ public class BlockService {
                 byte[] encryptedData = cipher.doFinal(plaintext);
                 String encryptedText = bytesToHex(encryptedData);
 
-                encryptionResultService.saveEncryptionResult(new BlockCipherKey(user, key), request.getText(), encryptedText);
+                encryptionResultService.saveBlockCipherEncryptionResult(new BlockCipherKey(user, key), request.getText(), encryptedText);
                 return new TextResponse(encryptedText);
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -97,7 +97,7 @@ public class BlockService {
                 byte[] decryptedData = cipher.doFinal(encryptedData);
                 String decryptedText = bytesToHex(decryptedData);
 
-                encryptionResultService.saveEncryptionResult(new BlockCipherKey(user, key), request.getText(), decryptedText);
+                encryptionResultService.saveBlockCipherEncryptionResult(new BlockCipherKey(user, key), request.getText(), decryptedText);
                 return new TextResponse(decryptedText);
             } catch (Exception e) {
                 throw new RuntimeException(e);
