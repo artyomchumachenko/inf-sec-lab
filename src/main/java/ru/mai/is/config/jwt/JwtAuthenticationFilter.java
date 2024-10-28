@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import ru.mai.is.service.user.CustomUserDetailsService;
+import ru.mai.is.service.user.JwtTokenProvider;
 
 import lombok.RequiredArgsConstructor;
 

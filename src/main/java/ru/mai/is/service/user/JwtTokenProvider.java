@@ -1,4 +1,4 @@
-package ru.mai.is.config.jwt;
+package ru.mai.is.service.user;
 
 import java.util.Date;
 import java.util.Set;
@@ -11,8 +11,10 @@ import ru.mai.is.model.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.RequiredArgsConstructor;
 
 @Component
+@RequiredArgsConstructor
 public class JwtTokenProvider {
 
     @Value("${jwt.secret}")
@@ -42,6 +44,10 @@ public class JwtTokenProvider {
         }
     }
 
+    public String getTokenFromAuthorizationHeader(String authorizationHeader) {
+        return authorizationHeader.replace("Bearer ", "").trim();
+    }
+
     public String getUsernameFromJWT(String token) {
         Claims claims = Jwts.parser()
                 .setSigningKey(jwtSecret)
@@ -49,5 +55,10 @@ public class JwtTokenProvider {
                 .getBody();
 
         return claims.getSubject();
+    }
+
+    public String getUsernameFromAuthorizationHeader(String authorizationHeader) {
+        String token = getTokenFromAuthorizationHeader(authorizationHeader);
+        return getUsernameFromJWT(token);
     }
 }

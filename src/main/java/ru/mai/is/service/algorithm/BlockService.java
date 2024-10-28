@@ -2,14 +2,24 @@ package ru.mai.is.service.algorithm;
 
 import java.security.Security;
 
+import javax.annotation.PostConstruct;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import javax.persistence.EntityNotFoundException;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.stereotype.Service;
 
 import ru.mai.is.dto.request.algorithm.BlockRequest;
+import ru.mai.is.dto.response.TextResponse;
+import ru.mai.is.model.BlockCipherKey;
+import ru.mai.is.model.User;
+import ru.mai.is.service.EncryptionResultService;
+import ru.mai.is.service.KeyService;
+import ru.mai.is.service.user.JwtTokenProvider;
+import ru.mai.is.service.user.UserService;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import static ru.mai.is.algorithm.stribog.util.StringToByteArray.bytesToHex;
@@ -17,20 +27,30 @@ import static ru.mai.is.algorithm.stribog.util.StringToByteArray.castStringToByt
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class BlockService {
 
-    private final byte[] keyBytes;
+    public static final String DEFAULT_BLOCK_CIPHER_KEY = "8899aabbccddeeff0011223344556677fedcba98765432100123456789abcdef";
 
-    public BlockService() {
+    private final KeyService keyService;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final EncryptionResultService encryptionResultService;
+    private final UserService userService;
+
+    @PostConstruct
+    public void init() {
         Security.addProvider(new BouncyCastleProvider());
-        this.keyBytes = castStringToBytes(
-                "8899aabbccddeeff0011223344556677fedcba98765432100123456789abcdef"
-        );
     }
 
-    public String encrypt(String text, BlockRequest.BlockMode mode) {
+    public TextResponse encrypt(BlockRequest request, String authorizationHeader) {
+        BlockRequest.BlockMode mode = request.getMode();
+        String text = request.getText();
+        User user = userService.findByUsername(jwtTokenProvider.getUsernameFromAuthorizationHeader(authorizationHeader))
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
         if (mode.equals(BlockRequest.BlockMode.MODE_128)) {
-            SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "GOST3412-2015");
+            BlockCipherKey key = keyService.getLastBlockCipherKeyByUser(user);
+            SecretKeySpec keySpec = new SecretKeySpec(castStringToBytes(key.getKeyData()), "GOST3412-2015");
 
             // Открытый текст (128 бит = 16 байт)
             byte[] plaintext = castStringToBytes(text);
@@ -44,24 +64,32 @@ public class BlockService {
 
                 // Шифруем данные
                 byte[] encryptedData = cipher.doFinal(plaintext);
+                String encryptedText = bytesToHex(encryptedData);
 
-                return bytesToHex(encryptedData);
+                encryptionResultService.saveEncryptionResult(user, key, request.getText(), encryptedText);
+                return new TextResponse(encryptedText);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         } else if (mode.equals(BlockRequest.BlockMode.MODE_64)) {
-            return "Unsupported encryption format";
+            return new TextResponse("Unsupported encryption format");
         }
 
-        return "Unsupported encryption format";
+        return new TextResponse("Unsupported encryption format");
     }
 
-    public String decrypt(String encryptedText, BlockRequest.BlockMode mode) {
+    public TextResponse decrypt(BlockRequest request, String authorizationHeader) {
+        BlockRequest.BlockMode mode = request.getMode();
+        String text = request.getText();
+        User user = userService.findByUsername(jwtTokenProvider.getUsernameFromAuthorizationHeader(authorizationHeader))
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
         if (mode.equals(BlockRequest.BlockMode.MODE_128)) {
-            SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "GOST3412-2015");
+            BlockCipherKey key = keyService.getLastBlockCipherKeyByUser(user);
+            SecretKeySpec keySpec = new SecretKeySpec(castStringToBytes(key.getKeyData()), "GOST3412-2015");
 
             // Зашифрованный текст в виде массива байт (128 бит = 16 байт)
-            byte[] encryptedData = castStringToBytes(encryptedText);
+            byte[] encryptedData = castStringToBytes(text);
 
             // Инициализируем шифр для расшифрования
             Cipher cipher;
@@ -72,15 +100,17 @@ public class BlockService {
 
                 // Расшифровываем данные
                 byte[] decryptedData = cipher.doFinal(encryptedData);
+                String decryptedText = bytesToHex(decryptedData);
 
-                return bytesToHex(decryptedData);
+                encryptionResultService.saveEncryptionResult(user, key, request.getText(), decryptedText);
+                return new TextResponse(decryptedText);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         } else if (mode.equals(BlockRequest.BlockMode.MODE_64)) {
-            return "Unsupported decryption format";
+            return new TextResponse("Unsupported decryption format");
         }
 
-        return "Unsupported decryption format";
+        return new TextResponse("Unsupported decryption format");
     }
 }

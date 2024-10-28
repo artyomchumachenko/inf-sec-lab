@@ -1,9 +1,11 @@
 package ru.mai.is.controller;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,11 +23,10 @@ public class BlockController {
     private final BlockService blockService;
 
     @PostMapping("/encrypt")
-    public ResponseEntity<?> encrypt(@RequestBody BlockRequest request) {
+    public ResponseEntity<?> encrypt(@RequestBody BlockRequest request,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
         try {
-            String encryptedText = blockService.encrypt(request.getText(), request.getMode());
-            TextResponse response = new TextResponse(encryptedText);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(blockService.encrypt(request, authorizationHeader));
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new TextResponse("Block cipher encrypt error."));
@@ -33,11 +34,10 @@ public class BlockController {
     }
 
     @PostMapping("/decrypt")
-    public ResponseEntity<?> decrypt(@RequestBody BlockRequest request) {
+    public ResponseEntity<?> decrypt(@RequestBody BlockRequest request,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
         try {
-            String decryptText = blockService.decrypt(request.getText(), request.getMode());
-            TextResponse response = new TextResponse(decryptText);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(blockService.decrypt(request, authorizationHeader));
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new TextResponse("Block cipher decrypt error."));

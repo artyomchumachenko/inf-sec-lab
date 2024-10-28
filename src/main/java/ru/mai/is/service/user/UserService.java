@@ -9,7 +9,6 @@ import javax.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import ru.mai.is.config.jwt.JwtTokenProvider;
 import ru.mai.is.dto.request.user.LoginRequest;
 import ru.mai.is.dto.request.user.RegistrationRequest;
 import ru.mai.is.model.Role;
@@ -69,6 +68,7 @@ public class UserService {
         return saveUser(user);
     }
 
+    @Transactional(readOnly = true)
     public String login(LoginRequest loginRequest) {
         User user = userRepository.findByUsername(loginRequest.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
