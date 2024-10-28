@@ -1,11 +1,15 @@
 package ru.mai.is.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import ru.mai.is.model.BlockCipherKey;
 import ru.mai.is.model.EncryptionResult;
 import ru.mai.is.model.RSAKey;
+import ru.mai.is.model.User;
 import ru.mai.is.repository.EncryptionResultRepository;
+import ru.mai.is.service.user.UserService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +21,7 @@ public class EncryptionResultService {
 
     private final PdfGeneratorService pdfGeneratorService;
     private final EncryptionResultRepository encryptionResultRepository;
+    private final UserService userService;
 
     public void saveEncryptionResult(BlockCipherKey blockCipherKey, String inputText, String resultText) {
         log.info("Saving results for: {}, {}", inputText, resultText);
@@ -27,13 +32,14 @@ public class EncryptionResultService {
                 inputTextPdf,
                 resultTextPdf,
                 null, // todo Impl signature logic
+                blockCipherKey.getUser(),
                 null,
                 blockCipherKey
         );
         encryptionResultRepository.save(encryptionResult);
     }
 
-    public void saveRsaEncryptionResult(RSAKey key, String inputText, String resultText) {
+    public void saveRsaEncryptionResult(RSAKey rsaKey, String inputText, String resultText) {
         log.info("Saving results for: {}, {}", inputText, resultText);
         byte[] inputTextPdf = pdfGeneratorService.generatePdfByText(inputText);
         byte[] resultTextPdf = pdfGeneratorService.generatePdfByText(resultText);
@@ -42,9 +48,15 @@ public class EncryptionResultService {
                 inputTextPdf,
                 resultTextPdf,
                 null, // todo Impl signature logic
-                key,
+                rsaKey.getUser(),
+                rsaKey,
                 null
         );
         encryptionResultRepository.save(encryptionResult);
+    }
+
+    public List<EncryptionResult> findAllResults(String authorizationHeader) {
+        User user = userService.findByAuthorizationHeader(authorizationHeader);
+        return encryptionResultRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId());
     }
 }

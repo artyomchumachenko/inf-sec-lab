@@ -1,17 +1,18 @@
 package ru.mai.is.controller;
 
-import org.springframework.http.HttpStatus;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import ru.mai.is.dto.request.user.LoginRequest;
-import ru.mai.is.dto.request.user.RegistrationRequest;
-import ru.mai.is.model.User;
-import ru.mai.is.service.user.UserService;
+import ru.mai.is.dto.EncryptionResultDto;
+import ru.mai.is.model.EncryptionResult;
+import ru.mai.is.service.EncryptionResultService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,8 +21,16 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/history")
 public class HistoryController {
 
+    private final EncryptionResultService resultService;
+
     @GetMapping("")
-    public ResponseEntity<String> history() {
-        return ResponseEntity.badRequest().body("Not implemented history logic on the server");
+    public ResponseEntity<List<EncryptionResultDto>> history(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        List<EncryptionResult> encryptionResults = resultService.findAllResults(authorizationHeader);
+
+        List<EncryptionResultDto> historyDtos = encryptionResults.stream()
+                .map(EncryptionResultDto::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(historyDtos);
     }
 }

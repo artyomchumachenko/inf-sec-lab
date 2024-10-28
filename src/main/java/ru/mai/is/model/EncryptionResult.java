@@ -34,6 +34,11 @@ public class EncryptionResult extends AbstractAuditable {
     @Column(name = "signature", columnDefinition="bytea")
     private byte[] signature;
 
+    // Пользователь, к которому относится результат
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL) // Добавлен каскад для сохранения RSAKey
     @JoinColumn(name = "rsa_key_id")
     private RSAKey rsaKey;
