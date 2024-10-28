@@ -29,10 +29,7 @@ public class EncryptionResultService {
     private final EncryptionResultRepository encryptionResultRepository;
     private final UserService userService;
 
-    private final PdfSignerService pdfSigner;
-
     public void saveEncryptionResult(BlockCipherKey blockCipherKey, String inputText, String resultText) {
-        log.info("Saving results for: {}, {}", inputText, resultText);
         byte[] inputTextPdf = pdfGeneratorService.generatePdfByText(inputText);
         byte[] resultTextPdf = pdfGeneratorService.generatePdfByText(resultText);
 
@@ -66,7 +63,6 @@ public class EncryptionResultService {
     }
 
     public void saveRsaEncryptionResult(RSAKey rsaKey, String inputText, String resultText) {
-        log.info("Saving results for: {}, {}", inputText, resultText);
         byte[] inputTextPdf = pdfGeneratorService.generatePdfByText(inputText);
         byte[] resultTextPdf = pdfGeneratorService.generatePdfByText(resultText);
 

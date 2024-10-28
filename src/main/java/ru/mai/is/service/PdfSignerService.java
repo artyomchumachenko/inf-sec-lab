@@ -16,9 +16,7 @@ import com.itextpdf.text.pdf.security.ExternalSignatureContainer;
 import com.itextpdf.text.pdf.security.MakeSignature;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.springframework.stereotype.Service;
 
-@Service
 public class PdfSignerService {
 
     static {

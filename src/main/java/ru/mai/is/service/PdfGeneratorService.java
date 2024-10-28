@@ -2,10 +2,11 @@ package ru.mai.is.service;
 
 import java.io.ByteArrayOutputStream;
 
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import org.springframework.stereotype.Service;
 
@@ -18,24 +19,24 @@ import lombok.extern.slf4j.Slf4j;
 public class PdfGeneratorService {
 
     public byte[] generatePdfByText(String text) {
-        log.info("Generate pdf for text: {}", text);
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            // Создаем PdfWriter с использованием ByteArrayOutputStream
-            PdfWriter writer = new PdfWriter(outputStream);
-            PdfDocument pdfDocument = new PdfDocument(writer);
-            Document document = new Document(pdfDocument);
+            Document document = new Document();
+            PdfWriter.getInstance(document, outputStream);
+            document.open();
 
-            // Добавляем текст в документ
-            document.add(new Paragraph(text));
+            // Загрузка шрифта из файла
+            String fontPath = "src/main/resources/fonts/ArialRegular.ttf";
+            BaseFont baseFont = BaseFont.createFont(fontPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            Font font = new Font(baseFont, 12);
 
-            // Закрываем документ
+            // Добавление текста с указанным шрифтом
+            Paragraph paragraph = new Paragraph(text, font);
+            document.add(paragraph);
+
             document.close();
-
-            // Возвращаем PDF в виде массива байт
             return outputStream.toByteArray();
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            throw new RuntimeException("Ошибка при генерации PDF", e);
         }
     }
 }
