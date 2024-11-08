@@ -9,12 +9,16 @@ import javax.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import ru.mai.is.dto.request.algorithm.StribogRequest;
+import ru.mai.is.dto.request.hash.EncodeRequest;
+import ru.mai.is.dto.request.hash.HashRequest;
 import ru.mai.is.dto.request.user.LoginRequest;
 import ru.mai.is.dto.request.user.RegistrationRequest;
 import ru.mai.is.model.Role;
 import ru.mai.is.model.User;
 import ru.mai.is.repository.RoleRepository;
 import ru.mai.is.repository.UserRepository;
+import ru.mai.is.service.algorithm.StribogService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +32,7 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final StribogService stribogService;
 
     @Transactional(readOnly = true)
     public Optional<User> findByUsername(String username) {
@@ -85,5 +90,17 @@ public class UserService {
     public User findByAuthorizationHeader(String authorizationHeader) {
         String username = jwtTokenProvider.getUsernameFromAuthorizationHeader(authorizationHeader);
         return findByUsername(username).orElseThrow(() -> new EntityNotFoundException("User not found"));
+    }
+
+    public String getStribogHash(HashRequest hashRequest) {
+        StribogRequest stribogRequest = StribogRequest.builder()
+                .text(hashRequest.getInput())
+                .mode(StribogRequest.StribogMode.MODE_512)
+                .build();
+        return stribogService.getHash(stribogRequest);
+    }
+
+    public String encodePassword(EncodeRequest encodeRequest) {
+        return passwordEncoder.encode(encodeRequest.getUsername(), encodeRequest.getPassword());
     }
 }
