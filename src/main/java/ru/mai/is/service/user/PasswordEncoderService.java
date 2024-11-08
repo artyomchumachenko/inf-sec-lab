@@ -1,5 +1,6 @@
 package ru.mai.is.service.user;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import ru.mai.is.dto.request.algorithm.StribogRequest;
@@ -12,10 +13,12 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class PasswordEncoderService {
+@ConditionalOnProperty(name = "password.encoder.type", havingValue = "v1", matchIfMissing = true)
+public class PasswordEncoderService implements PasswordEncoder {
 
     private final StribogService stribogService;
 
+    @Override
     public String encode(String username, String password) {
         return hashAndSaltPassword(username, password);
     }
@@ -83,6 +86,7 @@ public class PasswordEncoderService {
         return stribogService.getHash(finalHashRequest);
     }
 
+    @Override
     public boolean matches(LoginRequest loginRequest, String expectedPassword) {
         String actualEncodedPassword = encode(loginRequest.getUsername(), loginRequest.getPassword());
         return actualEncodedPassword.equals(expectedPassword);

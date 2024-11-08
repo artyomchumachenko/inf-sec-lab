@@ -26,7 +26,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final PasswordEncoderService passwordEncoderService;
+    private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional(readOnly = true)
@@ -60,7 +60,7 @@ public class UserService {
                 .orElseThrow(() -> new EntityNotFoundException("Default role not found"));
         User user = new User(
                 request.getUsername(),
-                passwordEncoderService.encode(request.getUsername(), request.getPassword()),
+                passwordEncoder.encode(request.getUsername(), request.getPassword()),
                 request.getEmail(),
                 request.getPhone(),
                 Set.of(defaultRole)
@@ -73,7 +73,7 @@ public class UserService {
         User user = userRepository.findByUsername(loginRequest.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
 
-        if (passwordEncoderService.matches(loginRequest, user.getPassword())) {
+        if (passwordEncoder.matches(loginRequest, user.getPassword())) {
             // Генерируем JWT токен при успешной аутентификации
             return jwtTokenProvider.createToken(user.getUsername(), user.getRoles());
         } else {

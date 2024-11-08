@@ -14,3 +14,7 @@ keystore:
   path: ${KEYSTORE_PATH}
   password: ${KEYSTORE_PASSWORD}
   alias: ${KEYSTORE_ALIAS}
+
+password:
+  encoder:
+    type: v1  # Возможные значения: v1, v2
