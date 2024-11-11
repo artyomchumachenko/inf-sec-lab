@@ -6,6 +6,7 @@ import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,6 +38,9 @@ public class UserController {
     private final OtpService otpService;
     private final QrCodeService qrCodeService;
 
+    @Value("${password.encoder.type}")
+    private String appVersion;
+
     @PostMapping("/registration")
     public ResponseEntity<User> registrationUser(@RequestBody RegistrationRequest request) {
         return ResponseEntity.ok(userService.registration(request));
@@ -47,6 +51,10 @@ public class UserController {
         try {
             // Проверяем логин и пароль
             User user = userService.verifyCredentials(loginRequest);
+
+            if ("v2".equals(appVersion)) {
+                return ResponseEntity.ok(userService.generateToken(loginRequest.getUsername()));
+            }
 
             // Генерируем и отправляем OTP
             otpService.generateAndSendOTP(user);
