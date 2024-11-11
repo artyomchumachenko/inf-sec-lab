@@ -1,6 +1,5 @@
 package ru.mai.is.service.user;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -44,16 +43,6 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    @Transactional(readOnly = true)
-    public List<User> findAllUsers() {
-        return userRepository.findAll();
-    }
-
-    @Transactional
-    public void deleteUser(Long userId) {
-        userRepository.deleteById(userId);
-    }
-
     /**
      * Метод регистрации нового пользователя в системе
      * @param request Запрос на регистрацию пользователя
@@ -74,23 +63,23 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public String login(LoginRequest loginRequest) {
-        User user = userRepository.findByUsername(loginRequest.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
-
-        if (passwordEncoder.matches(loginRequest, user.getPassword())) {
-            // Генерируем JWT токен при успешной аутентификации
-            return jwtTokenProvider.createToken(user.getUsername(), user.getRoles());
-        } else {
-            throw new IllegalArgumentException("Неверный пароль");
-        }
-    }
-
-    @Transactional
     public User findByAuthorizationHeader(String authorizationHeader) {
         String username = jwtTokenProvider.getUsernameFromAuthorizationHeader(authorizationHeader);
         return findByUsername(username).orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
+
+    @Transactional(readOnly = true)
+    public User verifyCredentials(LoginRequest loginRequest) {
+        User user = userRepository.findByUsername(loginRequest.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+
+        if (!passwordEncoder.matches(loginRequest, user.getPassword())) {
+            throw new IllegalArgumentException("Неверный пароль");
+        }
+
+        return user;
+    }
+
 
     public String getStribogHash(HashRequest hashRequest) {
         StribogRequest stribogRequest = StribogRequest.builder()
@@ -102,5 +91,12 @@ public class UserService {
 
     public String encodePassword(EncodeRequest encodeRequest) {
         return passwordEncoder.encode(encodeRequest.getUsername(), encodeRequest.getPassword());
+    }
+
+    public String generateToken(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+
+        return jwtTokenProvider.createToken(user.getUsername(), user.getRoles());
     }
 }

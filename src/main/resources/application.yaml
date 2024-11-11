@@ -5,6 +5,18 @@ spring:
     password: ${SPRING_DATASOURCE_PASSWORD}
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
+  mail:
+    host: ${SPRING_MAIL_HOST}
+    username: ${SPRING_MAIL_LOGIN_FROM}
+    password: ${SPRING_MAIL_PASSWORD_FROM}
+    port: ${SPRING_MAIL_PORT}
+    protocol: ${SPRING_MAIL_PROTOCOL}
+    connection-timeout: 10000  # Таймаут на подключение (10 секунд)
+    timeout: 10000             # Таймаут на чтение данных (10 секунд)
+    write-timeout: 10000       # Таймаут на запись данных (10 секунд)
+
+mail:
+  debug: ${MAIL_DEBUG:false}
 
 jwt:
   secret: ${JWT_SECRET_KEY}

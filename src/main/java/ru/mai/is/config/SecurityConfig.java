@@ -33,7 +33,8 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Устанавливаем политику сессии
                 .and()
                 .authorizeHttpRequests()
-                .antMatchers("/user/login", "/user/registration").permitAll() // Разрешаем доступ без аутентификации
+                .antMatchers("/user/login", "/user/registration", // Разрешаем доступ без аутентификации
+                        "/user/verify-otp", "/user/generate-qr", "/user/verify-qr-code").permitAll()
                 .anyRequest().authenticated() // Все остальные запросы требуют аутентификации
                 .and()
                 .exceptionHandling()
